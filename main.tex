@@ -1,10 +1,21 @@
-\documentclass{article}
+\documentclass[12pt]{article}
 \usepackage{graphicx} % Required for inserting images
 \usepackage{geometry}
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
+\usepackage{float}
 
 \renewcommand{\figurename}{Slika}
+\renewcommand{\baselinestretch}{1.2} % Line spacing
+
+% Define a command to ensure the new section starts on an odd page
+\newcommand{\startnewsection}{
+    \clearpage % Ends the current page
+    \ifodd\value{page}\else % Check if the current page is odd
+        \hbox{} % Create an empty box
+        \newpage % Force a new page if the current page is even
+    \fi
+}
 
 \title{Bachelor Thesis}
 \author{Ivan Jevtic}
@@ -99,11 +110,46 @@
    \pagenumbering{arabic}
    \setcounter{page}{1}
 
+   \startnewsection
+
    \section{Uvod}
 
    \vspace{+0.5cm}
    
-   \subsection{Istorija i motivacija}
+   \subsection{Definicija}
+
+   \subsubsection{Kolaborativno uređivanje}
+
+    Kolaborativno uređivanje je proces u kojem više ljudi istovremeno radi na istom dokumentu. Ovakav pristup omogućava da različiti stručnjaci doprinesu sadržaju, što može poboljšati kvalitet dokumenta i ubrzati proces rada.
+
+    Važno je strateški odabrati najbolji pristup kako bi se postigla potpuna svest o tome ko doprinosi dokumentu, neometana koordinacija rada i aktivno učešće svih članova tima. Na primer, pisanje može biti precizno podeljeno na zadatke, gde svaki član grupe ima svoj specifičan deo, ili svi mogu sinhronizovano raditi zajedno na istom zadatku. Ovaj dinamičan proces obuhvata detaljno planiranje, inspirativno pisanje i temeljnu reviziju, pri čemu je više ljudi strateški uključeno u barem jednu od faza. Odluke o strukturi i sadržaju dokumenta uglavnom se donose zajednički kroz konstruktivnu i uključivu diskusiju unutar tima.
+    
+    Najčešće se kolaborativno uređivanje primenjuje na tekstualne dokumente ili programski kod. Asinhroni doprinosi članova su korisni jer ne moraju svi raditi u isto vreme, što štedi vreme. Takav rad obično zahteva specijalan softver. Tekstualni procesori takođe omogućavaju beleženje izmena, što omogućava pregled ko je i šta promenio u dokumentu. Moderni alati kao što su Google Docs nude funkcije za kolaborativno pisanje i uređivanje u realnom vremenu, sa mogućnošću sinhronog i asinhronog rada.
+
+    Kolaborativno uređivanje postoji u dva formata - sinhrono i asinhrono.
+
+    Kod \textbf{asinhronog} uređivanja promene se ne sinhronizuju u realnom vremenu. Korisnici mogu istovremeno da uređuju svoje kopije, ali da bi se sinhronizovale sa serverom i drugim klijentima, moraće da ručno izvrše ažuriranje promena. Sistem sam upravlja rešavanjem konflikata, spaja više izmena i dovodi kopiju u dosledno stanje.Nekada je potrebno da korisnik pomogne u rešavanju konflikata. Sve tehnologije za kontrolu verzija kao što su Git, CVS, Subversion itd. spadaju u ovu tehnologiju.
+
+    Kod \textbf{sinhronog} uređivanja promene se sinhronizuju u realnom vremenu. Korisnici mogu istovremeno da uređuju svoje kopije, ali će takođe odmah videti promene koje su napravili drugi klijenti. Korisnici nisu obavezni da ručno izvrše komitovanje ili ažuriranje promena, sistem to radi automatski. Sistem preuzima potpunu odgovornost za rešavanje konflikata, spajajući više izmena i dovodeći dokument u dosledno stanje. Ovaj koncept je popularizovan proizvodom pod nazivom Writely, koji je nudio uređivanje u pregledaču. Kupio ga je Google 2006. godine i pretvorio u Google Docs.
+    
+   \subsubsection{Višekorisnički kolaborativni editor}
+
+   Višekorisnički kolaborativni editor je alat koji omogućava više korisnika da istovremeno uređuju jedan isti dokument u realnom vremenu. Ovi editori su specifično dizajnirani da omoguće nesmetanu i efikasnu kolaboraciju, bez obzira na fizičku lokaciju učesnika. Ključne karakteristike ovakvih sistema uključuju sinhronizaciju izmena, kontrolu verzija i uvid u promene koje svaki korisnik napravi, uz minimalna kašnjenja ili konflikte.
+
+    \paragraph {Glavne karakteristike višekorisničkih kolaborativnih editora}
+    
+    \begin{itemize}
+        \item \textbf{Real-time sinhronizacija}: Sve izmene koje jedan korisnik napravi trenutno su vidljive ostalim korisnicima, bez potrebe za manuelnim osvežavanjem ili slanjem dokumenata.
+        \item \textbf{Istovremena izmena}: Više korisnika može uređivati isti dokument ili čak isti deo dokumenta u isto vreme.
+        \item \textbf{Praćenje promena}: Alat omogućava da se vidi ko je napravio koju promenu, olakšavajući timovima da prate napredak i diskutuju o izmenama.
+        \item \textbf{Kontrola verzija}: Većina ovih alata poseduje sistem za praćenje verzija, koji omogućava vraćanje na prethodne verzije dokumenta, ukoliko je to potrebno.
+        \item \textbf{Obaveštenja i komentarisanje}: Uključena su i obaveštenja o izmenama i mogućnost ostavljanja komentara na određene delove dokumenta, što pomaže u komunikaciji između učesnika.
+        \item \textbf{Upravljanje pristupom}: Urednici mogu imati različite nivoe pristupa (npr. samo za čitanje ili za uređivanje), čime se osigurava da samo određeni korisnici mogu menjati sadržaj.
+    \end{itemize}
+
+    Ovi editori su nezamenjivi u okruženjima gde je potrebno brzo donošenje odluka i rad na zajedničkim dokumentima, kao što su timski projekti, akademski radovi ili kodiranje softvera.
+
+    \subsection{Istorija i motivacija}
    
 
     \subsubsection{Rani razvoj kolaborativnih editora (1970-1980)}
@@ -152,7 +198,23 @@
     Pored GROVE-a, nekoliko drugih projekata je nastalo u ovom periodu, ali su svi imali slične izazove – mrežna infrastruktura nije bila dovoljno razvijena za globalnu kolaboraciju, a računarstvo nije bilo dovoljno moćno da podrži složene algoritme potrebne za rešavanje problema sinkronizacije i konzistentnosti podataka među korisnicima.
     
     Dakle, tokom 1970-ih i 1980-ih godina, iako su načinjeni značajni koraci u pravcu kolaborativnih sistema, ovi rani pokušaji su uglavnom ostali ograničeni na istraživačke laboratorije i specifične upotrebe unutar lokalnih mreža. Tek kasnije, sa razvojem interneta i većom dostupnošću mrežnih resursa, kolaborativni editori su počeli da ostvaruju svoj puni potencijal.
-    
-   
 
+    \subsubsection{Razvoj real-time kolaboracije (2000-te)}
+
+    Početak 2000-ih godina doneo je velike promene u načinu na koji ljudi rade zajedno, zahvaljujući razvoju interneta i novih tehnologija za kolaborativno uređivanje. Prethodne decenije, kolaborativni editori su postojali, ali su bili uglavnom ograničeni na lokalne mreže i zahtevali su specifične softverske sisteme. Sa ekspanzijom interneta, pojavile su se mogućnosti za udaljenu, real-time saradnju, što je omogućilo korisnicima da rade na istom dokumentu bez obzira na to gde se nalaze.
+
+    Jedan od prvih značajnih sistema koji je omogućio ovakvu vrstu saradnje bio je SubEthaEdit, predstavljen 2003. godine. SubEthaEdit je bio jednostavan tekstualni editor za macOS, koji je omogućavao više korisnika da istovremeno uređuju isti dokument preko mreže. Ovaj alat je postao popularan među korisnicima macOS-a zbog svoje jednostavnosti i efikasnosti u real-time kolaboraciji. SubEthaEdit je označio početak šire dostupnosti kolaborativnih alata za svakodnevne korisnike.
+    
+    Međutim, pravi proboj u ovoj oblasti dogodio se 2006. godine sa lansiranjem Google Docs platforme. Google Docs je bio revolucionaran u tome što je omogućio korisnicima da kreiraju i uređuju dokumente u oblaku, a svi učesnici su mogli da prate promene u realnom vremenu. Ovo je značilo da su više ljudi mogli istovremeno da rade na istom dokumentu, dok su izmene bile odmah vidljive svima. Takva funkcionalnost je do tada bila retka i skupa, a Google je ovu tehnologiju učinio dostupnom besplatno, čime je pokrenuo masovnu upotrebu real-time kolaboracije.
+    
+    Google Docs je iskoristio prednosti cloud infrastrukture, što je omogućilo da dokumenti budu sačuvani na udaljenim serverima, dostupni s bilo kog uređaja sa internet konekcijom. Ovaj pristup je eliminisao potrebu za lokalnim skladištenjem i omogućio je lako deljenje dokumenata među korisnicima. Alat je omogućio istovremeno uređivanje, komentarisanje i komunikaciju unutar dokumenata, što je dramatično ubrzalo procese zajedničkog rada, posebno u obrazovnim, poslovnim i kreativnim sektorima.
+    
+    Pored Google Docs-a, pojavili su se i drugi alati poput Etherpad-a (2008) koji je bio otvorenog koda i pružao slične funkcionalnosti za kolaborativno uređivanje u realnom vremenu. Etherpad je bio popularan među zajednicama otvorenog koda jer je omogućavao korisnicima da pokreću svoje sopstvene instance servera za kolaborativno uređivanje, pružajući fleksibilnost u korišćenju.
+    
+    Tokom ovog perioda, koncept kolaborativnog rada postao je centralni deo produktivnosti na internetu. Dok su Google Docs i slični alati omogućavali ljudima da zajedno pišu dokumente, paralelno su se razvijali i drugi oblici kolaborativnih platformi, poput Wikija i Trello-a, koji su se fokusirali na organizaciju i saradnju na projektima.
+    
+    Real-time kolaboracija je tokom 2000-ih evoluirala od jednostavnih tekstualnih editora do kompleksnih platformi koje omogućavaju ne samo zajedničko pisanje, već i komunikaciju, deljenje resursa, planiranje i upravljanje projektima. Ovaj period označava prekretnicu u razvoju kolaborativnih tehnologija, postavljajući temelje za današnje sofisticirane alate koji se koriste širom sveta u raznim industrijama.
+    
+    
 \end{document}
+

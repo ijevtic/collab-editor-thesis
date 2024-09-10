@@ -252,7 +252,61 @@
 
     \startnewsection
     
+    \section{Tehnike i Algoritmi za Sinhronizaciju i Rešavanje Konflikata u Višekorisničkim Editorima}
 
+    Fokusiraćemo se na tehnike i algoritme kod sinhronog kolaborativnog uređivanja dokumenata. 
+
+    \subsection{Mehanizam zaključavanja}
+
+    Kad god pričamo o deljenim resursima, prva stvar koja pada na pamet su \textbf{zaključavanja}.
+
+    Postoje dva učestala tipa zaključavanja.
+
+    \subsubsection{Pesimističko zaključavanje}
+
+    Pesimističko zaključavanje omogućava ekskluzivan pristup podacima od jedne strane, dok su sve ostale strane na čekanju. Često se koristi u situacijama gde je visoka verovatnoća konflikata, npr. u bankarskim sistemima, gde je važna tačnost podataka. Takođe, nema potrebe za razrešenjem konflikata, što čini ovaj pristup jednostavnijim. Zbog prirode rešenja, ovaj mehanizam može izazvati sporiji rad sistema.
+
+    \begin{figure}[h]
+        \centering
+        \includegraphics[width=0.8\textwidth]{pesimistic locking.png}
+        \caption{Pesimističko zaključavanje}
+        \label{fig:nls_demo}
+    \end{figure}
+
+    \subsubsection{Optimističko zaključavanje}
+
+    Optimističko zaključavanje je tehnika u upravljanju višekorisničkim pristupom koja se koristi za kontrolu pristupa deljenim resursima sa pretpostavkom da konflikti neće biti česti. Ova metoda omogućava korisnicima da slobodno pristupaju i uređuju resurse, a konflikti se rešavaju samo kada dođe do neslaganja prilikom ažuriranja resursa.
+
+    \begin{figure}[h]
+        \centering
+        \includegraphics[width=0.8\textwidth]{optimistic locking.png}
+        \caption{Optimističko zaključavanje}
+        \label{fig:nls_demo}
+    \end{figure}
+
+    \paragraph{}
+    Problem sinhronizacije u višekorisničkim editorima \textbf{ne može da se reši pesimističkim zaključavanjem}. To je zato što bi u jednom trenutku samo jedan korisnik imao pristup menjanju podataka. Ovo bi bila izuetno spora kolaboracija. U optimističkom zaključavanju svi korisnici mogu da menjaju dokument u istom trenutku. Treba da uspostavimo pravila koja će razrešavati potencijalne konflikte.
+
+    Svaki deljeni resurs na serveru ima verziju, vremensku oznaku ili heš koji je povezan s njim. Kada klijent pročita podatke sa servera, pamti verziju povezanu s tim podacima. Zatim te podatke obrađuje lokalno. Kada želi da upiše nove podatke nazad na server, trebalo bi da poveća verziju. Sada, ako je u međuvremenu neki drugi klijent ažurirao podatke i verziju, prvi klijent \textbf{ne može} da upiše svoje podatke nazad jer njegova lokalna kopija nije nastala na osnovu te verzije sa servera. U tom slučaju se razrešavaju konflikti. Nekada klijent odbaci svoje lokalne promene, ponovo preuzme nove podatke sa servera i započne operaciju iznova. Dva najučestalija mehanizma koja razrešavaju konflikte su:
+
+    \begin{itemize}
+        \item \textbf{Operational Transformation (OT)} \\
+        Algoritam koji omogućava automatsko upravljanje i sinhronizaciju promena u realnom vremenu. OT transformiše operacije uređivanja na način koji održava konzistentnost dokumenata između svih klijenata.
+        
+        \item \textbf{Conflict-free Replicated Data Types (CRDT)} \\
+        CRDT koristi matematičke strukture koje omogućavaju da se promene automatski sinhronizuju među klijentima bez potrebe za centralizovanim serverom ili manuelnim razrešavanjem konflikata.
+        
+        \item \textbf{Last-Writer-Wins (LWW)} \\
+        Ovaj jednostavan algoritam rešava konflikte tako što uzima poslednju izmenu koja je stigla na server kao važeću, bez obzira na to koja je starija verzija dokumenta.
+        
+        \item \textbf{Version Control with Merging} \\
+        Verziona kontrola sa spajanjem koristi princip da klijenti rade na sopstvenim verzijama dokumenta, a zatim sistem pokušava automatski da spoji promene kada se one pošalju na server.
+
+    \end{itemize}
+
+    OT i CRDT su najučestaliji algoritmi za automatsko razrešavanje konflikata, pa ćemo detaljno proći kroz ova dva pristupa.
+
+    
     
     
 \end{document}

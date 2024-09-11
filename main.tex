@@ -306,7 +306,172 @@
 
     OT i CRDT su najučestaliji algoritmi za automatsko razrešavanje konflikata, pa ćemo detaljno proći kroz ova dva pristupa.
 
-    
+    \subsection{Operational Transformation(OT)}
+
+    \subsubsection{Prve verzije Google Docs-a}
+
+    Prve verzije Google Docs-a su koristile poređenje verzija dokumenata. Zamislimo da imamo dva klijenta, Anu i Branka, koji imaju sinhronizovane dokumente. Kad server primi promene od Ane, tada računa razliku verzija između nje i sebe i pokušava da ih spoji. Tada server šalje spojenu verziju Branku. Ako Branko ima svoje neposlate promene on pokušava da spoji primljenu serversku verziju sa svojom. Proces se ponavlja.
+
+    Često ovaj pristup ne daje dobre rezultate. Uzmimo sledeći primer:
+
+    \begin{figure}[h]
+        \centering
+        \includegraphics[width=0.8\textwidth]{ana i branko.png}
+        \caption{Primer konflikta}
+        \label{fig:nls_demo}
+    \end{figure}
+
+    Ana i Branko oboje počinju sa rečenicom "Ispit je bio težak". Ana podebljava reči "bio težak", a u isto vreme Branko menja reč "lak" u "težak". Anina verzija prva stiže do servera, primenjuju se promene i sada ta verzija stiže do Branka. Tačno rešenje treba da bude "Ispit je \textbf{bio lak}". Međutim, algoritam nema dovoljno informacija da izvrši tačno spajanje. Nešto od sledećeg bi takođe moglo da bude tačno rešenje: "Ispit je \textbf{bio težak} lak", "Ispit je bio \textbf{težak} lak", "Ispit je  \textbf{bio} lak \textbf{težak}".
+
+    \subsubsection{Novije verzije Google Docs-a}
+
+    Dokument se čuva kao niz operacija, i one se primenjuju redom, umesto poređenja verzija dokumenata. Sada treba razumeti \textbf{kada} se primenjuju promene, kolaboracioni protokol. U Google Docs-u postoje tri različita tipa promena:
+
+    \begin{itemize}
+        \item Ubacivanje teksta
+        \item Brisanje teksta
+        \item Primena stila
+    \end{itemize}
+
+    Kada se uređuje dokument, sve izmene se dodaju u zapis promena kao jedna od ove tri vrste, i zapis promena se ponovo izvršava od određene tačke kada se otvori dokument.
+
+    Uzmimo sledeći primer:
+
+    Ana i Branko kreću od dokumenta "LIFE 2017". Ana menja 2017 u 2018 i zapisuju se dve operacije:
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.8\textwidth]{primer31.png}
+        \caption{Ana primenjuje dve operacije}
+        \label{fig:nls_demo}
+    \end{figure}
+
+    U isto vreme Branko menja tekst u "CRAZY LIFE 2017":
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.8\textwidth]{primer32.png}
+        \caption{Branko primenjuje svoje operacije}
+        \label{fig:nls_demo}
+    \end{figure}
+
+    Ako bi Branko samo primenio Aninu operaciju brisanja kada je primio, onda bi dobio nevalidan dokument(cifra 7 je trebalo da bude obrisana). 
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.8\textwidth]{primerlosbranko.png}
+        \caption{Loša primena operacija}
+        \label{fig:nls_demo}
+    \end{figure}
+
+    Branko treba da prilagodi operaciju brisanja u skladu sa svojim lokalnim izmenama kako bi dobio ispravno stanje dokumenta:
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[height=4cm]{primer33.png}
+        \caption{Dobra primena operacija}
+        \label{fig:nls_demo}
+    \end{figure}
+
+    Formalnije, pogledajmo sledeći primer:
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=0.8\textwidth]{formalniprimer.png}
+        \caption{Formalni primer}
+        \label{fig:nls_demo}
+    \end{figure}
+
+    onda važi da je:
+
+    \[
+    \huge
+    E = O1'(O2(X)) = O2'(O1(X))
+    \]
+
+    Upravo smo opisali kako funkcioniše algoritam OT.
+
+    \subsubsection{Modeli konzistentnosti(CCI model)}
+
+    Modeli konzistentnosti odnose se na pravila koja definišu kako se više kopija podataka sinhronizuju u distribuiranim sistemima. Nekoliko modela konzistentnosti je kreirano da pruži konsistentnost za OT.
+
+    \paragraph{CCI Model}
+
+    \begin{itemize}
+        \item \textbf{Konvergencija} \\
+        Sve replike istog dokumenta moraju biti identične nakon primene svih operacija.
+
+        \begin{figure}[H]
+            \centering
+            \includegraphics[height=7cm]{CCImodel.png}
+            \caption{CCI model}
+            \label{fig:nls_demo}
+        \end{figure}
+        Ana i Branko počinju od istog dokumenta, onda rade lokalne primene i replike divergiraju(ovim dobijamo dobru responzivnost). Svojstvo konvergencije zahteva do klijenti vide isti dokument nakon primenjenih operacija koje su dobili.
+
+        \item \textbf{Očuvanje namere} \\
+        Osigurava da će efekat izvršavanja operacije na bilo kom stanju dokumenta biti isti kao namera operacije. Namera operacije se definiše kao efekat njenog izvršenja na repliku na kojoj je kreirana. Razmotrimo primer u kojem je ovo svojstvo narušeno:
+
+        \begin{figure}[H]
+            \centering
+            \includegraphics[height=7cm]{OcuvanjeNamere.png}
+            \caption{(Ne)Očuvanje namere}
+            \label{fig:nls_demo}
+        \end{figure}
+        Ana i Branko počinju od istog stanja dokumenta, zatim vrše svoje lokalne izmene. Namera Anine operacije je da ubaci '12' na poziciju 1, dok je namera Brankove operacije da obriše 'CD'. Nakon sinhronizacije, Bobova namera je narušena. Iako su replike različite, to nije neophodno za svojstvo očuvanja namere. 
+
+        \item \textbf{Očuvanje kauzalnosti} \\
+        Operacije moraju biti izvršene u skladu sa njihovim prirodnim redosledom uzroka i posledica tokom procesa kolaboracije (zasnovano na relaciji "dogodilo se pre"). Pogledaemo primer gde je kauzalnost naruena:
+
+        \begin{figure}[H]
+            \centering
+            \includegraphics[height=10cm]{nepostovanjeKauzalnosti.png}
+            \caption{Nepoštovanje kauzalnosti}
+            \label{fig:nls_demo}
+        \end{figure}
+
+        Ana, Branko i vanja kreću od istog stanja dokumenta. Ana pravi promenu i šalje drugim klijentima. Branko prima prvi promenu, menja pravopisnu grešku i šalje promene ostalim klijentima. Zbog zagušenja u mreži, Vanja prvo dobija Brankovu operaciju, koja je brisanjew simbola koji još uvek ne postoji u njegovoj replici.
+
+        Operational Transformation ne može da obezbedi ovo svojstvo, pa se mogu koristiti drugi algoritmi kao što je Vektorski sat.
+
+        \textbf{Vektorski sat} je struktura podataka koja se koristi za određivanje delimičnog redosleda događaja u distribuiranom sistemu i otkrivanje kršenja uzročnosti. Poruke između procesa sadrže stanje logičkog sata procesa koji šalje poruku. Vektorski sat u sistemu sa N procesa je niz od N logičkih satova, gde svaki proces ima po jedan sat. Svaki proces lokalno čuva kopiju tog niza sa najvećim mogućim vrednostima, što predstavlja stanje globalnog sata.
+
+        \begin{enumerate}
+            \item Inicijalno svi satovi imaju vrednost \textbf{nula}.
+            \item Pre pravljenja operacije, proces \textit{i} inkrementira \textit{i}-ti element svog vektorskog sata za 1.
+            \[ VC_i = VC_i + 1 \]
+            \item Svaki put kada proces šalje poruku, inkrementira sopstveni logički sat u vektoru za 1, zatim šalje ceo vektor.
+            \item Svaki put kada proces \textit{i} prima poruku, inkrementira \textit{i}-ti element svog vektorskog sata za 1. Za sve ostale procese, uzima maksimum odgovarajućeg elementa u poruci i svoje lokalne vrednosti u vektoru.
+            \[ VC_j = max(Vmsg_j, VC_j)\]
+            \begin{figure}[H]
+                \centering
+                \includegraphics[height=5cm]{vektorskisat.png}
+                \caption{Vektorski sat}
+                \label{fig:nls_demo}
+            \end{figure}
+            
+        \end{enumerate}
+
+    \end{itemize}
+
+    \subsubsection{Dizajn OT-a(WIP???)}
+
+    \subsubsection{Kritike}
+
+    \begin{itemize}
+        \item Sve promene u dokumentu moraju biti sačuvane u nizu operacija
+        \item Implementacija OT-a može biti veoma kompleksan zadatak, citat sa Vikipedije:
+
+        \begin{quote}
+            Nažalost, implementacija OT-a je užasna. Postoji milion algoritama sa različitim kompromisima, uglavnom zarobljenih u akademskim radovima. Algoritmi su zaista teški i vremenski zahtevni za pravilnu implementaciju. [...] Wave je trajao 2 godine da se napiše, a ako bismo ga danas ponovo pisali, trajalo bi skoro isto toliko dugo. 
+            \begin{flushright}
+            --- Joseph Gentle, bivši inženjer Google Wave-a i autor Share.JS biblioteke
+            \end{flushright}
+        \end{quote}
+        
+    \end{itemize}
+
+    \subsection{Conflict-free Replicated Data Types(CRDT)}
     
     
 \end{document}

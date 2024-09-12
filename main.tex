@@ -472,7 +472,109 @@
     \end{itemize}
 
     \subsection{Conflict-free Replicated Data Types(CRDT)}
+
+    Koristili smo aplikacije kao što je Google Drive. On omogućava:
+
+    \begin{itemize}
+        \item Rad u Offline režimu
+        \item Pristup sa više različitih uređaja
+        \item Više ljudi koji istovremeno uređuju iste podatke
+    \end{itemize}
+
+    Zadatak koji programeri tih sistema moraju rešiti je kako osigurati "glatku" sinhronizaciju podataka u takvim situacijama. U idealnom slučaju, interakcija korisnika ne bi trebalo da bude potrebna.
+
+    Kao i OT, CRDT takođe automatski razrešava konflikte prilikom spavanja, tako što uvodi poseban skup osnovnih tipova podataka.
+
+    \subsubsection{Snažna eventualna konzistentnost}
+
+    Kada se priča o konzistentnosti, spominju se ova tri termina:
+
+    \begin{itemize}
+        \item \textbf{Snažna konzistentnost(SC)}: sve operacije pisanja su izvršene striktno sekvencijalno, a operacije čitanja sa replika vraćaju isti, poslednje napisan rezultat. Konsenzus u realnom vremenu je potreban da bi se rešili konflikti, omogućava da do n/2-1 čvorova bude van funkcije.
+        \item \textbf{Eventualna konzistentnost(EC)}: promene se prvo izvrše lokalno, a zatim se propagiraju. Čitanje na nekim replikama može vratiti zastarelo stanje. U slučaju konflikata, potrebno je odlučiti šta je ispravno stanje. To znači da je konsenzus i dalje potreban, ali ne u realnom vremenu.
+        \item \textbf{Snažna eventualna konzistentnost(SEC)}: EC + replike imaju mehanizam sa automatski rešavaju konflikte, tako da konsenzus nije potreban. Dozvoljava da n-1 čvorova bude van funkcije.
+    \end{itemize}
+
+    Postoji dosta istraživanja koja se bave eventualnom konzistentnošću. Istražuju se druge varijante koje nisu toliko ograničavajuće poput SC. CRDT pruža \textbf{snažnu eventualnu konzistentnost}.
+
+    \subsubsection{"Likes and hits" problem}
+
+    "Likes and hits" problem je dugo poznati izazov u distribuiranim sistemima, konkretno kod društvenih mreža, gde korisnici mogu da interaguju sa sadržajem u realnom vremeenu(lajkovanjem postova ili videa, ili povećavajući gledanost). Suština problema je održavanje preciznog broja lajkova, gledanja, ili drugih metrika kroz distribuirani sistem gde se sadržajem može interagovati sa različitih lokacija.
+
+    \paragraph{Broj pogodaka na google.com:}
+
+    Google.com prima oko 150000 zahteva po sekundi sa različitih delova planete. Očigledno je da će se brojač ažurirati asinhrono. Možemo da uvedemo redove koji izvršavaju zadatke asinhrono, ali ako dobijemo zahtev za vrednost brojača moramo da izvršimo replikaciju, inače nam mnogo zahteva za čitanje može oboriti server.
+
+    Da li možemo da zaobiđemo redove ako već radimo replikaciju?
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[height=5cm]{replikacija.png}
+        \caption{Replikacija}
+        \label{fig:nls_demo}
+    \end{figure}
     
+    \subsubsection{Tipovi u CRDT-u, semantika razrešavanja konflikata}
+
+    CRDT-ovi su specijalni tipovi podataka koji konvergiraju podatke sa svih replika baze podataka. Popularni CRDT-ovi su G-brojači (brojači koji samo rastu), PN-brojači (pozitivno-negativni brojači), registri, G-skupovi (skupovi koji samo rastu), 2P-skupovi (dvostepeni skupovi), OR-skupovi (skupovi sa zapaženim uklanjanjem), itd. Iza kulisa, oni se oslanjaju na sledeće matematičke osobine da bi konvergirali podatke:
+
+    \begin{itemize}
+        \item \textbf{Komutativnost}: $a \circ b = b \circ a $
+        \item \textbf{Asocijativnost}: $a \circ (b \circ c) = (a \circ b) \circ c $
+        \item \textbf{Idempotentnost}: $a \circ a = a $
+    \end{itemize}
+    
+    G-brojač je primer operativnog CRDT-a koji spaja operacije. Ovde, a + b = b + a i a + (b + c) = (a + b) + c. Replike međusobno razmenjuju samo ažuriranja (sabiranja). CRDT spaja ažuriranja dodavanjem. G-skup, na primer, primenjuje idempotentnost ({a, b, c} U {c} = {a, b, c}) kako bi spojio sve elemente. Idempotentnost izbegava dupliranje elemenata dodanih u strukturu podataka dok putuju i konvergiraju kroz različite putanje.
+
+    \paragraph{Strukture podataka bez konflikata: G-brojači, PN-brojači, G-skupovi:}
+
+    Svi ovi tipovi podataka su dizajnirani tako da ne dolazi do konflikata. Tabele ispod prikazuju kako se podaci sinhronizuju između replika baza podataka. 
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[height=5cm]{crdt1.png}
+        \caption{Primer kako PN-brojači sinhronizuju promene}
+        \label{fig:nls_demo}
+    \end{figure}
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=12cm]{crdt2.png}
+        \caption{G-skupovi garantuju unikatne elemente}
+        \label{fig:nls_demo}
+    \end{figure}
+
+    G-brojači i PN-brojači su popularni za primene kao što su globalno glasanje, brojanje strimova, praćenje aktivnosti i slično. G-skupovi se često koriste za implementaciju blokčejn tehnologije. Na primer, Bitkoin koristi zapise u blokčejnu koji se samo dodaju.
+
+    \paragraph{Strukture podataka sa konfliktima}:
+
+    \textbf{Registri} prirodno dolaze sa konfliktima. Obično koriste tehnike kao što su "Last Write Wins" (LWW) ili rešavanje konflikata zasnovano na kvorumu. Na slici ispod prikazan je primer kako registar rešava konflikt prateći LWW politiku.
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=10cm]{crdt3.png}
+        \caption{LWW pristup kod registara}
+        \label{fig:nls_demo}
+    \end{figure}
+
+    \textbf{2P-skupovi(two phase sets)} održavaju dva skupa G-setova — jedan za dodate stavke i drugi za uklonjene stavke. Replike razmenjuju dodatke G-setova prilikom sinhronizacije. Konflikt nastaje kada se isti element nađe u oba skupa. U nekim CRDT bazama podataka, to se rešava politikom „Dodavanje pobeđuje brisanje”.
+
+    \begin{figure}[H]
+        \centering
+        \includegraphics[width=12cm]{crdt4.png}
+        \caption{"Dodavanje pobeđuje brisanje" za 2P-skupove}
+        \label{fig:nls_demo}
+    \end{figure}
+
+    \subsubsection{"Likes and hits" rešenje}
+
+    U kontekstu problema sa "Likes" i "Hits", CRDT-ovi poput PN-brojača nude rešenje za sinhronizaciju velikih količina podataka koji se brzo menjaju i pristupaju sa različitih mesta. Iako rezultati mogu biti zastareli dok sinhronizacija ne bude obavljena, krajnji cilj je da se obezbedi eventualna konzistentnost između svih replika bez potrebe za stalnim sinhronizovanjem pri svakom zahtevu. Nakon završene sinhronizacije, sve replike će konvergirati na istu finalnu vrednost.
+
+    \begin{figure}[h]
+        \centering
+        \includegraphics[width=12cm]{likes and hits.png}
+        \label{fig:nls_demo}
+    \end{figure}
     
 \end{document}
 

@@ -5,6 +5,10 @@
 \usepackage[utf8]{inputenc}
 \usepackage{float}
 \usepackage{hyperref}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{fancybox}
+\usepackage[most]{tcolorbox} 
 
 \renewcommand{\figurename}{Slika}
 \renewcommand{\baselinestretch}{1.2} % Line spacing
@@ -17,6 +21,39 @@
         \newpage % Force a new page if the current page is even
     \fi
 }
+
+% Define custom colors
+\definecolor{darkgreen}{rgb}{0.0, 0.5, 0.0} % Custom dark green color
+\definecolor{grayborder}{rgb}{0.6, 0.6, 0.6} % Custom gray color for the border
+
+\lstdefinelanguage{JavaScript}{
+  keywords={break, case, catch, continue, debugger, default, delete, do, else, finally, for, function, if, in, instanceof, new, return, switch, this, throw, try, typeof, var, void, while, with, let, const, await, async},
+  sensitive=true,
+  comment=[l]{//},
+  morecomment=[s]{/*}{*/},
+  morestring=[b]',
+  morestring=[b]",
+  keywordstyle=\color{blue}\bfseries,
+  commentstyle=\color{gray}\itshape,
+  stringstyle=\color{darkgreen}, % Changed to a darker green
+}
+
+\lstset{
+  language=JavaScript,
+  basicstyle=\scriptsize\ttfamily, % Make font size smaller
+  keywordstyle=\color{blue}\bfseries,
+  commentstyle=\color{gray}\itshape,
+  stringstyle=\color{darkgreen},
+  numberstyle=\tiny\color{gray},
+  stepnumber=1,
+  showstringspaces=false,
+  tabsize=2
+}
+
+% Define a tcolorbox style for listings
+\newtcolorbox[auto counter, number within=section]{mylisting}[2][]{colback=white!10!white, colframe=grayborder,
+  fonttitle=\bfseries, title=Listing~\thetcbcounter: #2,#1}
+
 
 \title{Bachelor Thesis}
 \author{Ivan Jevtic}
@@ -602,9 +639,155 @@ Za komunikaciju klijenata, trebaće nam jedan \textbf{Node.js} server, kroz koji
 
 Klijentska strana će biti implementiran u React-u, iz više razloga. Prvi je zato što će nam trebati share-db klijent, koji komunicira sa serverom, i šalje operacije u standardizovanom formatu. Drugi je zato što ćemo koristiti \href{https://microsoft.github.io/monaco-editor/}{Monaco Editor}, open source editor koji nudi razne standardne funkcionalnosti modernog editora, kao što je automatsko dovršavanje reči, prikaz više kursora istovremeno, automatsko formatiranje koda itd. Na klijentu ćemo vršiti komunikaciju sa serverom preko soketa\footnote{Soket je krajnja tačka za komunikaciju između dva računara ili procesa preko mreže, koja omogućava slanje i primanje podataka.}. Pored stvari vezanih za multi kolaborativan editor, imaćemo i druge elemente koje su potrebne za alat pomoću kog može da se sprovodi intervju(video komunikacija, pokretanje koda, algoritam za dodelu zadatka itd.) koje nećemo detaljno objašnjavati.
 
-SLIKA EDITOR
+SLIKA EDITOR \\
 SLIKA ARHITEKTURA
 
+\subsection{Implementacija}
+
+\subsubsection{Inicijalizacija sesije}
+
+Na serverskoj strani inicijalizujemo objekat share, koji nam treba za prihvatanje konekcija sa klijenta:
+
+\begin{mylisting}[label={lst:example}]{Inicijalizacija servera}
+\begin{lstlisting}
+var express = require('express')
+var WebSocket = require('ws')
+var http = require('http')
+var ShareDB = require('sharedb')
+var WebSocketJSONStream = require('@teamwork/websocket-json-stream')
+
+var app = express()
+var server = http.createServer(app)
+var webSocketServer = new WebSocket.Server({server: server})
+
+const share = new shareDB({ presence: true });
+webSocketServer.on('connection', (webSocket) => {
+  var stream = new WebSocketJSONStream(webSocket)
+  share.listen(stream)
+})
+
+server.listen(8080)
+\end{lstlisting}
+\end{mylisting}
 
 
+Definisaćemo i objekat connection
+\begin{mylisting}[label={lst:example}]{Connection objekat}
+\begin{lstlisting}
+const connection = share.connect();
+\end{lstlisting}
+\end{mylisting}
+
+Pomoću ovog objekta imamo pristup \textit{in-memory} bazi od share-db-a, i prilikom klijentskog zahteva možemo vratiti odgovarajući dokument od sesije:
+
+\begin{mylisting}[label={lst:example}]{Primanje zahteva}
+\begin{lstlisting}
+app.post("/", (req, res) => {
+  let sessionId = req.body.sessionId;
+  
+  const doc = connection.get("session", sessionId);
+  doc.fetch((err) => {
+    if (err) throw err;
+
+    if (doc.type == null) {
+      doc.create(initialDoc);
+    }
+  });
+
+  //fetches task for the sessionId
+  fetchTaskData(sessionId)
+    .then((data) => res.json(data));
+}
+  
+\end{lstlisting}
+\end{mylisting}
+
+Kod kreiranja dokumenta možemo staviti odgovarajući \textit{json} objekat, recimo inicijalni kod. 
+
+\begin{mylisting}[label={lst:example}]{Inicijalni dokument}
+\begin{lstlisting}
+const initialDoc = {
+    sourceCode : {
+        "#include <iostream>
+        int main() {
+            return 0;
+        }"
+    },
+    lang: "c++"
+};
+\end{lstlisting}
+\end{mylisting}
+
+Na klijentskoj strani, pri inicijalizaciji editor komponente ćemo uspostaviti vezu sa serverom:
+
+\begin{mylisting}[label={lst:example}]{main.tsx}
+\begin{lstlisting}
+"use client";
+...
+import shareDB from "sharedb/lib/client";
+
+const Editor: React.FC = () => {
+  useEffect(() => {
+    let rws = new ReconnectingWebSocket(ws_url);
+    rws.addEventListener("open", () => {
+      let connection = new shareDB.Connection(rws);
+      let doc = connection.get("session", startInfo.sessionId);
+    }
+  }, []);
+}
+\end{lstlisting}
+\end{mylisting}
+
+Koristićemo \textit{monaco} editor:
+
+\begin{mylisting}[label={lst:example}]{monacoEditor.tsx}
+\begin{lstlisting}
+import { MonacoProps } from "@/app/editor/types/types";
+import Editor from "@monaco-editor/react";
+
+const MonacoEditor = (props: MonacoProps) => {
+  const { language, code, readOnly, editorDidMount, editorOnChange } = props;
+
+  return (
+    <Editor
+      options={options}
+      language={language}
+      value={code}
+      onMount={editorDidMount}
+      onChange={editorOnChange}
+    />
+  );
+};
+export default MonacoEditor;
+\end{lstlisting}
+\end{mylisting}
+
+\subsubsection{Detektovanje promena i sinhronizacija stanja}
+
+Na svaku promenu stanja kod klijenta koje može biti:
+
+\begin{itemize}
+    \item Dodavanje karaktera
+    \item Brisanje karaktera
+    \item Promena kursora
+    \item Promena jezika
+\end{itemize}
+
+treba izvršiti operaciju, a zatim je i emitovati ka drugom klijentu.
+
+\begin{mylisting}[label={lst:example}]{main.tsx}
+\begin{lstlisting}
+doc.subscribe(err => {
+  if (err) throw err;
+  const presenceInstance = connection.getPresence("session");
+  presenceInstance.subscribe(err => {
+    if (err) throw err;
+  });
+  let localPresenceInstance = presenceInstance.create();
+  const newBinding = initializeBinding([doc, monaco, code, lang]);
+  newBinding.setup();
+});
+
+\end{lstlisting}
+\end{mylisting}
 \end{document}

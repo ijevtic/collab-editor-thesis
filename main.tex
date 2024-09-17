@@ -22,6 +22,16 @@
     \fi
 }
 
+\usepackage[
+   backend=biber,
+   style=numeric,
+   sorting=none
+   ]{biblatex}
+
+\addbibresource{bibliography.bib}
+\AtBeginBibliography{\vspace*{10pt}}
+
+
 % Define custom colors
 \definecolor{darkgreen}{rgb}{0.0, 0.5, 0.0} % Custom dark green color
 \definecolor{grayborder}{rgb}{0.6, 0.6, 0.6} % Custom gray color for the border
@@ -97,7 +107,7 @@
 				            
 				\fontsize{14pt}{18pt}\selectfont
 				\textbf{Komisija:} \\
-				dr Miloš Radenković & dr Miloš Radenković \\
+				dr Miloš Radenković &  \\
 				                                 
 			\end{tabular}
 		\end{center}
@@ -492,8 +502,6 @@ Modeli konzistentnosti odnose se na pravila koja definišu kako se više kopija 
 	      
 \end{itemize}
 
-\subsubsection{Dizajn OT-a(WIP???)}
-
 \subsubsection{Kritike}
 
 \begin{itemize}
@@ -639,7 +647,11 @@ Za komunikaciju klijenata, trebaće nam jedan \textbf{Node.js} server, kroz koji
 
 Klijentska strana će biti implementiran u React-u, iz više razloga. Prvi je zato što će nam trebati share-db klijent, koji komunicira sa serverom, i šalje operacije u standardizovanom formatu. Drugi je zato što ćemo koristiti \href{https://microsoft.github.io/monaco-editor/}{Monaco Editor}, open source editor koji nudi razne standardne funkcionalnosti modernog editora, kao što je automatsko dovršavanje reči, prikaz više kursora istovremeno, automatsko formatiranje koda itd. Na klijentu ćemo vršiti komunikaciju sa serverom preko soketa\footnote{Soket je krajnja tačka za komunikaciju između dva računara ili procesa preko mreže, koja omogućava slanje i primanje podataka.}. Pored stvari vezanih za multi kolaborativan editor, imaćemo i druge elemente koje su potrebne za alat pomoću kog može da se sprovodi intervju(video komunikacija, pokretanje koda, algoritam za dodelu zadatka itd.) koje nećemo detaljno objašnjavati.
 
-SLIKA EDITOR \\
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=15cm]{editor.jpeg}
+	\label{fig:nls_demo}
+\end{figure}
 SLIKA ARHITEKTURA
 
 \subsection{Implementacija}
@@ -762,7 +774,7 @@ export default MonacoEditor;
 \end{lstlisting}
 \end{mylisting}
 
-\subsubsection{Detektovanje promena i sinhronizacija stanja}
+\subsubsection{Detektovanje promena i slanje operacija}
 
 Na svaku promenu stanja kod klijenta koje može biti:
 
@@ -775,19 +787,255 @@ Na svaku promenu stanja kod klijenta koje može biti:
 
 treba izvršiti operaciju, a zatim je i emitovati ka drugom klijentu.
 
+
 \begin{mylisting}[label={lst:example}]{main.tsx}
 \begin{lstlisting}
 doc.subscribe(err => {
   if (err) throw err;
-  const presenceInstance = connection.getPresence("session");
-  presenceInstance.subscribe(err => {
+  const presence = connection.getPresence("session");
+  presence.subscribe(err => {
     if (err) throw err;
   });
-  let localPresenceInstance = presenceInstance.create();
+  let localPresenceInstance = presence.create();
   const newBinding = initializeBinding([doc, monaco, code, lang]);
   newBinding.setup();
 });
-
 \end{lstlisting}
 \end{mylisting}
+
+U \textit{listener}-u monaco editora ćemo pozvati metodu koja pravi novu operaciju:
+
+\begin{mylisting}[label={lst:example}]{Monaco Listener}
+\begin{lstlisting}
+const editorOnChange = (newValue: any, e: any) => {
+  binding.inputListener(newValue, e);
+};
+\end{lstlisting}
+\end{mylisting}
+
+Metoda \textit{inputListener} beleži promene, registruje koji tekst se promenio i na kojoj poziciji, i prema tome zove operacije \textit{insert} ili \textit{remove}. 
+
+\begin{mylisting}[label={lst:example}]{textBinding.tsx}
+\begin{lstlisting}
+const inputListener = (newValue: any, e: any) => {
+  let previous = this.doc.data[this.path[0]];
+  let value = newValue;
+  if (previous === value) return;
+
+  let start = 0;
+  let end = 0;
+  while (previous.charAt(start) === value.charAt(start)) {
+    start++;
+  }
+  while (
+    previous.charAt(previous.length - 1 - end) === 
+    value.charAt(value.length - 1 - end) &&
+    end + start < previous.length &&
+    end + start < value.length
+  ) {
+    end++;
+  }
+  if (previous.length !== start + end) {
+    let removed = previous.slice(start, previous.length - end);
+    remove(start, removed, e.changes[0].rangeOffset);
+  }
+  if (value.length !== start + end) {
+    let inserted = value.slice(start, value.length - end);
+    insert(start, inserted, e.changes[0].rangeOffset);
+  }
+};
+\end{lstlisting}
+\end{mylisting}
+
+Slede i \textit{insert} i \textit{remove} funkcije:
+
+\begin{mylisting}[label={lst:example}]{\textit{insert} i \textit{remove}}
+\begin{lstlisting}
+
+insert = (index: any, text: any, rangeOffset: number) => {
+  let path = this.path.concat(index);
+  let op = { p: path, si: text, rangeOffset: rangeOffset };
+  this.doc.submitOp(op);
+};
+
+remove = (index: any, text: any, rangeOffset: number) => {
+  let path = this.path.concat(index);
+  let op = { p: path, sd: text, rangeOffset: rangeOffset };
+  this.doc.submitOp(op);
+};
+\end{lstlisting}
+\end{mylisting}
+
+Objekat \textit{doc} ima ugrađenu funkciju submitOp koja operaciju šalje na server, drugom klijentu šalje promene.
+
+Takođe, želimo da našu trenutnu poziciju kursora propagiramo do drugog klijenta:
+
+\begin{mylisting}[label={lst:example}]{Propagiranje pozicije kursora do drugog klijenta}
+\begin{lstlisting}
+monaco.onDidChangeCursorSelection((e: any) => {
+  binding.localPresence.submit(e.selection, (err: Error) => {
+    if (err) throw err;
+  });
+});
+\end{lstlisting}
+\end{mylisting}
+
+\subsubsection{Primena promena od drugog klijenta}
+
+Objekat \textit{presence} koji smo dobili od konekcije pri početku sesije, ima mogućnost osluškivanja promena sa servera:
+
+\begin{mylisting}[label={lst:example}]{Propagiranje pozicije kursora do drugog klijenta}
+\begin{lstlisting}
+presence.on("receive", (id, range) => {
+  let isPos = range.startLineNumber === range.endLineNumber &&
+  range.startColumn === range.endColumn;
+  const decorations = editor.deltaDecorations(binding.decorations, [
+    {
+      range: new monaco.Range(range.startLineNumber, 
+      range.startColumn, range.endLineNumber, range.endColumn),
+      options: {
+        className: isPos ? "cursor-position" : "cursor-selection",
+      },
+    },
+  ]);
+  binding.updateDecorations(decorations);
+  binding.updateRange(range);
+});
+\end{lstlisting}
+\end{mylisting}
+
+Operacije vezane za kod se automatski primenjuju, a samostalno implementiramo pomeranje kursora. Kod monaco editora prikaz kursora je zapravo prikaz selekcije koja počinje i završava se na istom karakteru. U zavisnosti od toga da li je selekcija dužine 0 ili veće, prikazujemo selekciju u stilu kursora ili selekcije.
+
+\subsubsection{Završetak sesije}
+
+Dodaćemo dugme na sredini stranice koje ima mogućnost prekida sesije. Treba zatvoriti \textit{socket}, prekinuti vezu sa \textit{doc i presence} objektima, prestati emitovanje preko \textit{localPresence} objekta, zatvoriti konekciju.
+
+\begin{mylisting}[label={lst:example}]{main.tsx}
+\begin{lstlisting}
+const endSession = () => {
+  rws.close();
+  doc.unsubscribe();
+  presence.unsubscribe();
+  localPresence.destroy();
+  connection.close();
+};
+\end{lstlisting}
+\end{mylisting}
+
+\startnewsection
+
+\section{Postojeća rešenja}
+
+\subsection{Etherpad}
+
+Etherpad je \textit{open-source} alat za zajedničko uređivanje teksta u realnom vremenu, gde više ljudi može istovremeno raditi na istom dokumentu. Sve promene su odmah vidljive, a svaki korisnik ima svoju boju kako bi se lakše pratilo ko šta piše. Koristan je za timsku saradnju.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=12cm]{etherpad_screenshot.png}
+	\caption{Etherpad}
+	\label{fig:nls_demo}
+\end{figure}
+
+\subsubsection{Ideja}
+Koristi OT kao algoritam za automatsko razrešavanje konflikata, sa malo drugačijim transformacionim funkcijama - šalje promene na server u sledećem obliku:
+
+\[ (p1 -> p2)[c_1, c_2, …] \], gde je:
+
+\begin{itemize}
+    \item $p_1$ — dužina dokumenta pre izmene
+    \item $p_2$ — dužina dokumenta nakon izmene
+    \item $c_i$ — dve mogućnosti:
+    \begin{itemize}
+        \item ako je $c_i$ — broj ili opseg brojeva, to su indeksi nepromenjenih karaktera, ili
+        \item ako je $c_i$ — karakter ili string, to znači ubacivanje novih elemenata u dokument
+    \end{itemize}
+\end{itemize}
+
+Primer:
+
+\begin{verbatim}
+"" + (0 -> 5)["Hello"] = "Hello"
+"Hllo World" + (10 -> 14)[0, 'e', 1–9, "!!!"] = "Hello World!!!"
+\end{verbatim}
+
+Dokument se formira kao hronološki niz takvih promena (changeset-ova) primenjenih na prazan dokument.
+
+Možemo primetiti da server ne može jednostavno primeniti promene od klijenata jer dužine dokumenata mogu biti različite. Na primer, ako klijenti A i B počnu od istog dokumenta X dužine $n$ i izvrše sledeće promene respektivno:
+
+\begin{align*}
+A: & \quad (n \to n_a)[\dots], \\
+B: & \quad (n \to n_b)[\dots]
+\end{align*}
+
+tada je $B(A(X))$ nemoguće jer B zahteva dokument dužine $n$, ali dokument ima dužinu $n_a$ nakon što je A primenjen. Da bi se rešio ovaj problem, Etherpad uvodi tzv. \emph{merge} funkciju koja uzima 2 changeset-a koja se odnose na istu verziju dokumenta i računa novi jedinstveni changeset. Potrebno je da:
+
+\[ m(A,B) = m(B,A) \]
+
+Nije od velike koristi računati $m(A, B)$ kada klijent A primi promene od klijenta B, jer $m(A, B)$ se odnosi na stanje $X$, ali A je u stanju $A(X)$. Umesto toga, treba izračunati $A'$ i $B'$ tako da:
+
+\[ B'(A(X)) = A'(B(X)) = m(A,B)(X) \]
+
+Radi jednostavnosti, definišimo funkciju \emph{follow} $f$:
+
+\[ f(A,B) = B' \]
+\[ f(B,A) = A' \]
+\[ f(A,B)(A) = f(B,A)(A) = m(A,B) = m(B,A) \]
+
+Primer:
+
+\[ X = (0 \to 8)["baseball"] \]
+\[ A = (8 \to 5)[0-1,"si",7] // == "basil"\]
+\[ A = (8 \to 5)[0,"e",6,"ow"] // == "below"\]
+
+Onda:
+
+\[ A' = f(B,A) = (5 \to 6)[0,1,"si",3,4] \]
+\[ B' = f(A,B) = (5 \to 6)[0,"e",2,3,"ow"]\]
+\[ m(A,B) = m(B,A) = A(B') = B(A') = (8 \to 6)[0, "esiow"]\]
+
+Dakle, uspeli smo da pomoću funkcije \textit{f} postignemo isto stanje dokumenta nakon primene operacija.
+
+\subsubsection{Kritike}
+
+Etherpad ima problem sa performansama kada korisnici uređuju vrlo velike dokumente, pogotov kada mnogo korisnika radi na istom dokumentu. Takođe je interfejs pomalo zastareo, podseća na Google Docs, ali sa manje funkcionalnosti. 
+
+Okruženje je namenjeno kolaboraciji na dokumentima, ne koristi se toliko za kolaboraciju u pisanju koda, jer je editor tipičan tekstualni editor.
+
+\subsection{Firepad}
+
+Firepad je takođe \textit{open-source} alat za zajedničko uređivanje teksta u realnom vremenu. Pored tekstualnog, sadrži i kod editor, pa je pogodan i za pair-programming ili intervju sesije. Implementiran je od strane Firebase tima.
+
+\subsubsection{Ideja}
+
+Zanimljivost kod Firepad-a za razliku od drugih rešenja je što koristi Firebase za slanje operacija između klijenata. To znači da server nije potreban, jer se klijenti direktno povezuju i razmenjuju informacije preko Firebase-a. 
+
+\paragraph{Firebase Realtime Database: } svaka izmena teksta se sinhronizuje putem Firebase baze podataka. Kada jedan korisnik napravi promenu, ona se odmah snima u bazu, a svi ostali korisnici automatski dobijaju tu izmenu zahvaljujući real-time sposobnostima Firebase-a.
+
+\paragraph{Dokument u Realtime Database: } Firepad čuva dokumente kao JSON objekte u Firebase-u. Struktura može sadržavati tekstualne podatke, istoriju uređivanja i metapodatke kao što su korisnici koji trenutno uređuju dokument.
+
+Firepad takođe koristi OT za rešavanje konflikata. Moguće je i offline uređivanje fajla. Nakon ponovnog uspostavljanja veze, izmene se sinhronizuju sa bazom i drugim korisnicima.
+
+\subsubsection{Kritike}
+
+Firepad projekat je prestao sa razvojem i održavanjem. Edtior je izgledao moderno za to kada je napravljen, ali sada uz razvoj modernijih editora, nije najbolje rešenje za rad.
+
+Takođe, aplikacija ne može funkcionisati bez aktivne Firebase instance, što može povećati troškove sa mnogo pisanja i čitanja u bazi.
+
+
+\startnewsection
+\section{Zaključak}
+
+U ovom radu smo detaljno obradili koncept višekorisničkih kolaborativnih editora, njihovu ulogu i značaj u modernim aplikacijama za timski rad. Istorijski pregled pokazuje kako su kolaborativni alati evoluirali i zašto je njihovo unapređivanje uvek bilo od ključnog značaja za produktivnost i efikasnost.
+
+Razmotrene su savremene tehnike automatskog rešavanja konflikata u kolaborativnim okruženjima, uz konkretne primere koji ilustruju prednosti i nedostatke svake od njih, kao i scenariji u kojima je preporučljivo koristiti određenu tehniku.
+
+Kroz praktičnu implementaciju prikazano je kako se, koristeći postojeće biblioteke za rešavanje konflikata, može brzo i efikasno izgraditi funkcionalan kolaborativni editor. Posebna pažnja posvećena je analizi aktuelnih rešenja, gde su razmatrani tehnički detalji implementacije, prednosti, ali i nedostaci koji prate ova rešenja.
+
+Iako se u praksi koriste mnoge tehnike za sinhronizaciju podataka, ne postoji savršeno rešenje koje garantuje potpuno identične replike dokumenata nakon kolaboracije, pre svega zbog inherentnih ograničenja tehnike kao što je Operational Transformation (OT). Buduća istraživanja bi mogla biti usmerena ka razvoju novih tehnika za automatsko rešavanje konflikata ili pojednostavljenju implementacije postojećih algoritama, sa ciljem olakšavanja validacije i testiranja u realnim scenarijima.
+
+\newpage
+
+\printbibliography[title={Literatura}]
+
 \end{document}

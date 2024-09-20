@@ -28,7 +28,7 @@
    sorting=none
    ]{biblatex}
 
-\addbibresource{bibliography.bib}
+\addbibresource{references.bib}
 \AtBeginBibliography{\vspace*{10pt}}
 
 
@@ -148,9 +148,13 @@
     
 \vspace*{0.5in}
 
-Ovaj diplomski rad istražuje \textbf{višekorisničke kolaborativne editore}, sisteme koji omogućavaju istovremenu saradnju više korisnika na istom dokumentu u realnom vremenu. U uvodnom delu rada, pružen je detaljan pregled osnovnih principa ovih sistema, uključujući \textbf{sinhronizaciju promena}, \textbf{upravljanje konfliktima} i \textbf{održavanje doslednosti} između različitih korisnika. Takođe, analizirani su postojeći alati i rešenja, kao što su \textbf{Google Docs} i \textbf{Microsoft Office Online}, zajedno sa njihovim prednostima i manama.
-    
-Rad se zatim fokusira na razvoj prilagođenog višekorisničkog kolaborativnog editora. Opisuje se \textbf{arhitektura rešenja}, korišćeni \textbf{algoritmi} za sinhronizaciju podataka, kao i izazovi u vezi sa \textbf{performansama} i \textbf{bezbednošću}. Prikazani su rezultati eksperimenata koji testiraju efikasnost razvijenog sistema, zajedno sa diskusijom o njegovoj primeni u stvarnim uslovima i mogućnostima za dalja unapređenja.
+Here is a reference to the work by Sousa \cite{sousa2012} and by Finn \cite{finn2016}.
+
+Ovaj diplomski rad istražuje \textbf{višekorisničke kolaborativne editore}, sisteme koji omogućavaju istovremenu saradnju više korisnika na istom dokumentu u realnom vremenu. U uvodnom delu rada, pružen je detaljan pregled osnovnih principa ovih sistema i kratak istorijat razvijanja kolaborativnih editora.
+
+Detaljno su opisana dva algoritma za automatsko rešavanje konflikata kod kolaborativnih editora, a to su \textbf{Operational Transformation} i \textbf{Conflict-free Replicated Data Types}.
+
+Rad se zatim fokusira na razvoj prilagođenog višekorisničkog kolaborativnog editora. Opisuje se \textbf{arhitektura rešenja} i korišćeni \textbf{algoritmi} za sinhronizaciju podataka. Takođe, analizirani su postojeći alati i rešenja, kao što su \textbf{Etherpad}\cite{etherpad} i \textbf{Firepad}\cite{firepad}, zajedno sa njihovim prednostima i manama.
 
 \newpage
 
@@ -207,7 +211,7 @@ Ideja kolaborativnih editora, koji omogućavaju više korisnika da istovremeno r
 Jedan od prvih važnih koraka u ovom pravcu bio je razvoj \textbf{NLS sistema (oN-Line System)}, koji je predstavio \textbf{Daglas Engelbart} 1968. godine.
 
 \paragraph{}
-\textbf{NLS sistem}, poznat kao \textbf{oN-Line System (NLS)}, razvijen je zahvaljujući finansiranju od strane DARPA-e i Ratnog vazduhoplovstva SAD-a. NLS je zamišljen od strane \textbf{Daglasa Engelbarta} i razvijen u saradnji sa njegovim kolegama iz \textbf{Stanford Research Institute} (SRI). Ovaj sistem je prvi uveo koncept \textbf{hipertekstualnih linkova}, \textbf{miša}, \textbf{raster-sken monitora}, organizaciju informacija po relevantnosti, \textbf{prozor na ekranu} (windowing), prezentacione programe i mnoge druge koncepte koji su danas sastavni deo savremenih računarskih sistema.
+\textbf{NLS sistem}, poznat kao \textbf{oN-Line System (NLS)}, razvijen je zahvaljujući finansiranju od strane DARPA-e i Ratnog vazduhoplovstva SAD-a. NLS je zamišljen od strane \textbf{Daglasa Engelbarta} i razvijen u saradnji sa njegovim kolegama iz \textbf{Stanford Research Institute} (SRI). Ovaj sistem je prvi uveo koncept \textbf{hipertekstualnih linkova}, \textbf{miša}, \textbf{raster-sken monitora}, organizaciju informacija po relevantnosti, \textbf{prozor na ekranu} (windowing), prezentacione programe i mnoge druge koncepte koji su danas sastavni deo savremenih računarskih sistema. \cite{gerritsen1992}
     
 Dana \textbf{9. decembra 1968.}, Engelbart je javnosti predstavio NLS sistem u San Francisku, na \textbf{Fall Joint Computer Conference}, događaju koji je kasnije postao poznat kao \textit{"Majka svih demonstracija"} zbog brojnih revolucionarnih funkcija koje su tom prilikom prvi put prikazane. Engelbartov terminal bio je povezan sa video projekcijom velikog formata, pozajmljenom od NASA Ames Research Center, a putem telefonskih linija povezan je sa SDS 940 računarom u Menlo Parku, Kalifornija, na udaljenosti od 30 milja, gde se nalazio \textbf{Augmentation Research Center}, koji je Engelbart osnovao u SRI.
     
@@ -217,7 +221,7 @@ Na ekranu visokom skoro \textbf{7 metara}, sa video umecima, publika je mogla da
 	\centering
 	\includegraphics[width=0.8\textwidth]{nls.jpg}
 	\caption{Daglas Engelbart tokom "Majke svih demonstracija", 1968.}
-	\label{fig:nls_demo}
+	
 \end{figure}
 
     
@@ -226,7 +230,7 @@ Iako NLS nije bio kolaborativni editor u savremenom smislu, predstavljao je revo
 U toku 1970-ih i ranih 1980-ih, nekoliko naučnih radova i istraživanja pokušalo je da reši problem zajedničkog uređivanja dokumenata. Međutim, zbog ograničenih mrežnih kapaciteta i činjenice da internet još uvek nije bio široko dostupan, razvoj je bio fokusiran na lokalne mreže i eksperimentalne sisteme. Primer toga bio je konceptualni okvir poznat kao \textbf{"Shared Workspace"}, koji je omogućavao korisnicima da dele radno okruženje i informacije u realnom vremenu. Ovi rani sistemi su omogućavali deljenje sadržaja, ali nisu nudili dinamičko uređivanje, koje je karakteristično za modernu kolaboraciju.
 
 \paragraph{}
-Tokom kasnih 1980-ih, tehnologija je značajno napredovala, a računarstvo je postajalo sve moćnije i pristupačnije. Ova era je videla pojavu prvih pravih kolaborativnih editora. Jedan od prvih sistema koji je omogućio više korisnika da uređuju dokumente u realnom vremenu bio je \textbf{GROVE (Group Outline Viewing Editor)}, razvijen 1989. godine. GROVE je omogućavao simultano uređivanje strukturisanih dokumenata i predstavljao je jedan od pionirskih sistema za kolaborativno uređivanje. Iako je bio ograničen na lokalne mreže, zbog nedostatka interneta i infrastrukture za širu mrežnu primenu, GROVE je pokazao kako bi kolaboracija mogla funkcionisati u okruženju sa više korisnika.
+Tokom kasnih 1980-ih, tehnologija je značajno napredovala, a računarstvo je postajalo sve moćnije i pristupačnije. Ova era je videla pojavu prvih pravih kolaborativnih editora. Jedan od prvih sistema koji je omogućio više korisnika da uređuju dokumente u realnom vremenu bio je \textbf{GROVE (Group Outline Viewing Editor)}, razvijen 1989. godine. GROVE je omogućavao simultano uređivanje strukturisanih dokumenata i predstavljao je jedan od pionirskih sistema za kolaborativno uređivanje. Iako je bio ograničen na lokalne mreže, zbog nedostatka interneta i infrastrukture za širu mrežnu primenu, GROVE je pokazao kako bi kolaboracija mogla funkcionisati u okruženju sa više korisnika.\cite{sibbet2024}
 
 GROVE omogućava prikazivanje više pogleda na konturu, gde se svaki prikaz prikazuje u grupnom prozoru koji može biti repliciran na više mašina. Ovi prikazi mogu biti privatni, deljeni ili javni, u zavisnosti od potreba korisnika. Značajna karakteristika GROVE sistema je njegov grupni prozor, koji prikazuje prisustvo i aktivnost svih učesnika koji rade na dokumentu. U ovom zajedničkom prostoru korisnici mogu izvršavati standardne operacije uređivanja, kao što su umetanje, brisanje, sečenje i lepljenje teksta. Sistem takođe nudi napredne funkcionalnosti, poput proširivanja i skupljanja delova konture, kao i promene dozvola za čitanje i pisanje specifičnih stavki.
 
@@ -234,7 +238,7 @@ GROVE omogućava prikazivanje više pogleda na konturu, gde se svaki prikaz prik
 	\centering
 	\includegraphics[width=0.8\textwidth]{grove.png}
 	\caption{Grove grupni prozor, 1989.}
-	\label{fig:nls_demo}
+	
 \end{figure}
 
 Jedna od ključnih karakteristika GROVE sistema je kolaboracija u realnom vremenu—svaka promena koju napravi jedan učesnik odmah je vidljiva ostalima, osiguravajući da svi učesnici budu u toku sa najnovijim izmenama. Ovaj mehanizam povratne informacije u realnom vremenu bio je od suštinskog značaja za kreiranje visoko interaktivnog i responzivnog okruženja.
@@ -257,7 +261,7 @@ Međutim, pravi proboj u ovoj oblasti dogodio se 2006. godine sa lansiranjem Goo
     
 Google Docs je iskoristio prednosti cloud infrastrukture, što je omogućilo da dokumenti budu sačuvani na udaljenim serverima, dostupni s bilo kog uređaja sa internet konekcijom. Ovaj pristup je eliminisao potrebu za lokalnim skladištenjem i omogućio je lako deljenje dokumenata među korisnicima. Alat je omogućio istovremeno uređivanje, komentarisanje i komunikaciju unutar dokumenata, što je dramatično ubrzalo procese zajedničkog rada, posebno u obrazovnim, poslovnim i kreativnim sektorima.
     
-Pored Google Docs-a, pojavili su se i drugi alati poput Etherpad-a (2008) koji je bio otvorenog koda i pružao slične funkcionalnosti za kolaborativno uređivanje u realnom vremenu. Etherpad je bio popularan među zajednicama otvorenog koda jer je omogućavao korisnicima da pokreću svoje sopstvene instance servera za kolaborativno uređivanje, pružajući fleksibilnost u korišćenju.
+Pored Google Docs-a, pojavili su se i drugi alati poput Etherpad-a (2008)\cite{etherpad} koji je bio otvorenog koda i pružao slične funkcionalnosti za kolaborativno uređivanje u realnom vremenu. Etherpad je bio popularan među zajednicama otvorenog koda jer je omogućavao korisnicima da pokreću svoje sopstvene instance servera za kolaborativno uređivanje, pružajući fleksibilnost u korišćenju.
     
 Tokom ovog perioda, koncept kolaborativnog rada postao je centralni deo produktivnosti na internetu. Dok su Google Docs i slični alati omogućavali ljudima da zajedno pišu dokumente, paralelno su se razvijali i drugi oblici kolaborativnih platformi, poput Wikija i Trello-a, koji su se fokusirali na organizaciju i saradnju na projektima.
     
@@ -286,7 +290,7 @@ je kolaborativni alat za dizajn koji omogućava real-time uređivanje i deljenje
 	\centering
 	\includegraphics[width=0.8\textwidth]{figma.png}
 	\caption{Alat za kolaboraciju Figma}
-	\label{fig:nls_demo}
+	
 \end{figure}
     
 \paragraph{Notion}  
@@ -312,24 +316,24 @@ Postoje dva učestala tipa zaključavanja.
 
 \subsubsection{Pesimističko zaključavanje}
 
-Pesimističko zaključavanje omogućava ekskluzivan pristup podacima od jedne strane, dok su sve ostale strane na čekanju. Često se koristi u situacijama gde je visoka verovatnoća konflikata, npr. u bankarskim sistemima, gde je važna tačnost podataka. Takođe, nema potrebe za razrešenjem konflikata, što čini ovaj pristup jednostavnijim. Zbog prirode rešenja, ovaj mehanizam može izazvati sporiji rad sistema.
+Pesimističko zaključavanje omogućava ekskluzivan pristup podacima od jedne strane, dok su sve ostale strane na čekanju. Često se koristi u situacijama gde je visoka verovatnoća konflikata, npr. u bankarskim sistemima, gde je važna tačnost podataka. Takođe, nema potrebe za razrešenjem konflikata, što čini ovaj pristup jednostavnijim. Zbog prirode rešenja, ovaj mehanizam može izazvati sporiji rad sistema.\cite{acharya2020}
 
 \begin{figure}[h]
 	\centering
 	\includegraphics[width=0.8\textwidth]{pesimistic locking.png}
 	\caption{Pesimističko zaključavanje}
-	\label{fig:nls_demo}
+	
 \end{figure}
 
 \subsubsection{Optimističko zaključavanje}
 
-Optimističko zaključavanje je tehnika u upravljanju višekorisničkim pristupom koja se koristi za kontrolu pristupa deljenim resursima sa pretpostavkom da konflikti neće biti česti. Ova metoda omogućava korisnicima da slobodno pristupaju i uređuju resurse, a konflikti se rešavaju samo kada dođe do neslaganja prilikom ažuriranja resursa.
+Optimističko zaključavanje je tehnika u upravljanju višekorisničkim pristupom koja se koristi za kontrolu pristupa deljenim resursima sa pretpostavkom da konflikti neće biti česti. Ova metoda omogućava korisnicima da slobodno pristupaju i uređuju resurse, a konflikti se rešavaju samo kada dođe do neslaganja prilikom ažuriranja resursa.\cite{acharya2020}
 
 \begin{figure}[h]
 	\centering
 	\includegraphics[width=0.8\textwidth]{optimistic locking.png}
 	\caption{Optimističko zaključavanje}
-	\label{fig:nls_demo}
+	
 \end{figure}
 
 \paragraph{}
@@ -366,7 +370,7 @@ Prve verzije Google Docs-a su koristile poređenje verzija dokumenata. Zamislimo
 	\centering
 	\includegraphics[width=0.8\textwidth]{ana i branko.png}
 	\caption{Primer konflikta}
-	\label{fig:nls_demo}
+	
 \end{figure}
 
 Ana i Branko oboje počinju sa rečenicom "Ispit je bio težak". Ana podebljava reči "bio težak", a u isto vreme Branko menja reč "lak" u "težak". Anina verzija prva stiže do servera, primenjuju se promene i sada ta verzija stiže do Branka. Tačno rešenje treba da bude "Ispit je \textbf{bio lak}". Međutim, algoritam nema dovoljno informacija da izvrši tačno spajanje. Nešto od sledećeg bi takođe moglo da bude tačno rešenje: "Ispit je \textbf{bio težak} lak", "Ispit je bio \textbf{težak} lak", "Ispit je  \textbf{bio} lak \textbf{težak}".
@@ -391,7 +395,7 @@ Ana i Branko kreću od dokumenta "LIFE 2017". Ana menja 2017 u 2018 i zapisuju s
 	\centering
 	\includegraphics[width=0.8\textwidth]{primer31.png}
 	\caption{Ana primenjuje dve operacije}
-	\label{fig:nls_demo}
+	
 \end{figure}
 
 U isto vreme Branko menja tekst u "CRAZY LIFE 2017":
@@ -400,7 +404,7 @@ U isto vreme Branko menja tekst u "CRAZY LIFE 2017":
 	\centering
 	\includegraphics[width=0.8\textwidth]{primer32.png}
 	\caption{Branko primenjuje svoje operacije}
-	\label{fig:nls_demo}
+	
 \end{figure}
 
 Ako bi Branko samo primenio Aninu operaciju brisanja kada je primio, onda bi dobio nevalidan dokument(cifra 7 je trebalo da bude obrisana). 
@@ -409,7 +413,7 @@ Ako bi Branko samo primenio Aninu operaciju brisanja kada je primio, onda bi dob
 	\centering
 	\includegraphics[width=0.8\textwidth]{primerlosbranko.png}
 	\caption{Loša primena operacija}
-	\label{fig:nls_demo}
+	
 \end{figure}
 
 Branko treba da prilagodi operaciju brisanja u skladu sa svojim lokalnim izmenama kako bi dobio ispravno stanje dokumenta:
@@ -418,7 +422,7 @@ Branko treba da prilagodi operaciju brisanja u skladu sa svojim lokalnim izmenam
 	\centering
 	\includegraphics[height=4cm]{primer33.png}
 	\caption{Dobra primena operacija}
-	\label{fig:nls_demo}
+	
 \end{figure}
 
 Formalnije, pogledajmo sledeći primer:
@@ -427,7 +431,7 @@ Formalnije, pogledajmo sledeći primer:
 	\centering
 	\includegraphics[width=0.8\textwidth]{formalniprimer.png}
 	\caption{Formalni primer}
-	\label{fig:nls_demo}
+	
 \end{figure}
 
 onda važi da je:
@@ -453,7 +457,7 @@ Modeli konzistentnosti odnose se na pravila koja definišu kako se više kopija 
 	      	\centering
 	      	\includegraphics[height=7cm]{CCImodel.png}
 	      	\caption{CCI model}
-	      	\label{fig:nls_demo}
+	      	
 	      \end{figure}
 	      Ana i Branko počinju od istog dokumenta, onda rade lokalne primene i replike divergiraju(ovim dobijamo dobru responzivnost). Svojstvo konvergencije zahteva do klijenti vide isti dokument nakon primenjenih operacija koje su dobili.
 	      
@@ -464,7 +468,7 @@ Modeli konzistentnosti odnose se na pravila koja definišu kako se više kopija 
 	      	\centering
 	      	\includegraphics[height=7cm]{OcuvanjeNamere.png}
 	      	\caption{(Ne)Očuvanje namere}
-	      	\label{fig:nls_demo}
+	      	
 	      \end{figure}
 	      Ana i Branko počinju od istog stanja dokumenta, zatim vrše svoje lokalne izmene. Namera Anine operacije je da ubaci '12' na poziciju 1, dok je namera Brankove operacije da obriše 'CD'. Nakon sinhronizacije, Bobova namera je narušena. Iako su replike različite, to nije neophodno za svojstvo očuvanja namere. 
 	      
@@ -475,7 +479,7 @@ Modeli konzistentnosti odnose se na pravila koja definišu kako se više kopija 
 	      	\centering
 	      	\includegraphics[height=10cm]{nepostovanjeKauzalnosti.png}
 	      	\caption{Nepoštovanje kauzalnosti}
-	      	\label{fig:nls_demo}
+	      	
 	      \end{figure}
 	      
 	      Ana, Branko i vanja kreću od istog stanja dokumenta. Ana pravi promenu i šalje drugim klijentima. Branko prima prvi promenu, menja pravopisnu grešku i šalje promene ostalim klijentima. Zbog zagušenja u mreži, Vanja prvo dobija Brankovu operaciju, koja je brisanjew simbola koji još uvek ne postoji u njegovoj replici.
@@ -495,7 +499,7 @@ Modeli konzistentnosti odnose se na pravila koja definišu kako se više kopija 
 	      	      	\centering
 	      	      	\includegraphics[height=5cm]{vektorskisat.png}
 	      	      	\caption{Vektorski sat}
-	      	      	\label{fig:nls_demo}
+	      	      	
 	      	      \end{figure}
 	      	                  
 	      \end{enumerate}
@@ -557,7 +561,7 @@ Da li možemo da zaobiđemo redove ako već radimo replikaciju?
 	\centering
 	\includegraphics[height=5cm]{replikacija.png}
 	\caption{Replikacija}
-	\label{fig:nls_demo}
+	
 \end{figure}
     
 \subsubsection{Tipovi u CRDT-u, semantika razrešavanja konflikata}
@@ -580,14 +584,14 @@ Svi ovi tipovi podataka su dizajnirani tako da ne dolazi do konflikata. Tabele i
 	\centering
 	\includegraphics[height=5cm]{crdt1.png}
 	\caption{Primer kako PN-brojači sinhronizuju promene}
-	\label{fig:nls_demo}
+	
 \end{figure}
 
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=12cm]{crdt2.png}
 	\caption{G-skupovi garantuju unikatne elemente}
-	\label{fig:nls_demo}
+	
 \end{figure}
 
 G-brojači i PN-brojači su popularni za primene kao što su globalno glasanje, brojanje strimova, praćenje aktivnosti i slično. G-skupovi se često koriste za implementaciju blokčejn tehnologije. Na primer, Bitkoin koristi zapise u blokčejnu koji se samo dodaju.
@@ -600,7 +604,7 @@ G-brojači i PN-brojači su popularni za primene kao što su globalno glasanje, 
 	\centering
 	\includegraphics[width=10cm]{crdt3.png}
 	\caption{LWW pristup kod registara}
-	\label{fig:nls_demo}
+	
 \end{figure}
 
 \textbf{2P-skupovi(two phase sets)} održavaju dva skupa G-setova — jedan za dodate stavke i drugi za uklonjene stavke. Replike razmenjuju dodatke G-setova prilikom sinhronizacije. Konflikt nastaje kada se isti element nađe u oba skupa. U nekim CRDT bazama podataka, to se rešava politikom „Dodavanje pobeđuje brisanje”.
@@ -609,7 +613,7 @@ G-brojači i PN-brojači su popularni za primene kao što su globalno glasanje, 
 	\centering
 	\includegraphics[width=12cm]{crdt4.png}
 	\caption{"Dodavanje pobeđuje brisanje" za 2P-skupove}
-	\label{fig:nls_demo}
+	
 \end{figure}
 
 \subsubsection{"Likes and hits" rešenje}
@@ -619,7 +623,7 @@ U kontekstu problema sa "Likes" i "Hits", CRDT-ovi poput PN-brojača nude rešen
 \begin{figure}[h]
 	\centering
 	\includegraphics[width=12cm]{likes and hits.png}
-	\label{fig:nls_demo}
+	
 \end{figure}
 
 \startnewsection
@@ -643,14 +647,14 @@ Okruženje u kom se sprovode ovi intervjui podrazumevaju alat koji služi za kol
 
 \subsection{Arhitektura}
 
-Za komunikaciju klijenata, trebaće nam jedan \textbf{Node.js} server, kroz koji će klijenti komunicirati. Na serveru ćemo čuvati i podatke o sesiji, zadatke, proteklo vreme, kao i modul koji čuva podatke i komunicira sa konfliktima pomoću biblioteke \textbf{share-db}. \href{https://share.github.io/sharedb/}{Share-db} je biblioteka koja omogućava saradnju u realnom vremenu u aplikacijama koristeći mehanizam za sinhronizaciju podataka između više korisnika. 
+Za komunikaciju klijenata, trebaće nam jedan \textbf{Node.js} server, kroz koji će klijenti komunicirati. Na serveru ćemo čuvati i podatke o sesiji, zadatke, proteklo vreme, kao i modul koji čuva podatke i komunicira sa konfliktima pomoću biblioteke \textbf{share-db}. \href{https://share.github.io/sharedb/}{Share-db} je biblioteka koja omogućava saradnju u realnom vremenu u aplikacijama koristeći mehanizam za sinhronizaciju podataka između više korisnika. \cite{sharedb}
 
 Klijentska strana će biti implementiran u React-u, iz više razloga. Prvi je zato što će nam trebati share-db klijent, koji komunicira sa serverom, i šalje operacije u standardizovanom formatu. Drugi je zato što ćemo koristiti \href{https://microsoft.github.io/monaco-editor/}{Monaco Editor}, open source editor koji nudi razne standardne funkcionalnosti modernog editora, kao što je automatsko dovršavanje reči, prikaz više kursora istovremeno, automatsko formatiranje koda itd. Na klijentu ćemo vršiti komunikaciju sa serverom preko soketa\footnote{Soket je krajnja tačka za komunikaciju između dva računara ili procesa preko mreže, koja omogućava slanje i primanje podataka.}. Pored stvari vezanih za multi kolaborativan editor, imaćemo i druge elemente koje su potrebne za alat pomoću kog može da se sprovodi intervju(video komunikacija, pokretanje koda, algoritam za dodelu zadatka itd.) koje nećemo detaljno objašnjavati.
 
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=15cm]{editor.jpeg}
-	\label{fig:nls_demo}
+	
 \end{figure}
 SLIKA ARHITEKTURA
 
@@ -750,7 +754,7 @@ const Editor: React.FC = () => {
 \end{lstlisting}
 \end{mylisting}
 
-Koristićemo \textit{monaco} editor:
+Koristićemo \textit{monaco} editor\cite{monacoeditor}:
 
 \begin{mylisting}[label={lst:example}]{monacoEditor.tsx}
 \begin{lstlisting}
@@ -928,13 +932,13 @@ const endSession = () => {
 
 \subsection{Etherpad}
 
-Etherpad je \textit{open-source} alat za zajedničko uređivanje teksta u realnom vremenu, gde više ljudi može istovremeno raditi na istom dokumentu. Sve promene su odmah vidljive, a svaki korisnik ima svoju boju kako bi se lakše pratilo ko šta piše. Koristan je za timsku saradnju.
+Etherpad je \textit{open-source} alat za zajedničko uređivanje teksta u realnom vremenu, gde više ljudi može istovremeno raditi na istom dokumentu. Sve promene su odmah vidljive, a svaki korisnik ima svoju boju kako bi se lakše pratilo ko šta piše. Koristan je za timsku saradnju.\cite{etherpad}
 
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=12cm]{etherpad_screenshot.png}
 	\caption{Etherpad}
-	\label{fig:nls_demo}
+	
 \end{figure}
 
 \subsubsection{Ideja}
@@ -1004,7 +1008,7 @@ Okruženje je namenjeno kolaboraciji na dokumentima, ne koristi se toliko za kol
 
 \subsection{Firepad}
 
-Firepad je takođe \textit{open-source} alat za zajedničko uređivanje teksta u realnom vremenu. Pored tekstualnog, sadrži i kod editor, pa je pogodan i za pair-programming ili intervju sesije. Implementiran je od strane Firebase tima.
+Firepad je takođe \textit{open-source} alat za zajedničko uređivanje teksta u realnom vremenu. Pored tekstualnog, sadrži i kod editor, pa je pogodan i za pair-programming ili intervju sesije. Implementiran je od strane Firebase tima. \cite{firepad}
 
 \subsubsection{Ideja}
 
@@ -1035,6 +1039,8 @@ Kroz praktičnu implementaciju prikazano je kako se, koristeći postojeće bibli
 Iako se u praksi koriste mnoge tehnike za sinhronizaciju podataka, ne postoji savršeno rešenje koje garantuje potpuno identične replike dokumenata nakon kolaboracije, pre svega zbog inherentnih ograničenja tehnike kao što je Operational Transformation (OT). Buduća istraživanja bi mogla biti usmerena ka razvoju novih tehnika za automatsko rešavanje konflikata ili pojednostavljenju implementacije postojećih algoritama, sa ciljem olakšavanja validacije i testiranja u realnim scenarijima.
 
 \newpage
+
+\nocite{*}
 
 \printbibliography[title={Literatura}]
 
